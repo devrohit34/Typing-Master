@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Typing Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .setup-panel {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .setup-option {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .setup-option h3 {
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+        
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        select {
+            margin-bottom: 15px;
+        }
+        
+        button {
+            font-weight: bold;
+            background: linear-gradient(to right, #4CAF50, #45a049);
+            color: white;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #reset-btn {
+            background: linear-gradient(to right, #f44336, #d32f2f);
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .instructions h2 {
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .test-area {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        #sample-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 120px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-left: 4px solid #ffcc00;
+        }
+        
+        #typing-input {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            resize: none;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        #typing-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #ffcc00;
+        }
+        
+        .active-char {
+            background-color: #ffcc00;
+            color: #000;
+            padding: 2px;
+            border-radius: 3px;
+        }
+        
+        .correct-char {
+            color: #4CAF50;
+        }
+        
+        .incorrect-char {
+            color: #f44336;
+            text-decoration: underline;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            color: #ffcc00;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .results {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .results h2 {
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ffcc00;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .stat-box {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 150px;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        #wpm {
+            color: #4CAF50;
+        }
+        
+        #accuracy {
+            color: #2196F3;
+        }
+        
+        #errors {
+            color: #f44336;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .level-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .level-easy {
+            background-color: #4CAF50;
+        }
+        
+        .level-medium {
+            background-color: #FF9800;
+        }
+        
+        .level-hard {
+            background-color: #f44336;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .setup-panel {
+                flex-direction: column;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .watermark {
+                position: relative;
+                top: 0;
+                right: 0;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">CREATED BY ROHIT KUMAR</div>
+    
+    <div class="container">
+        <header>
+            <h1>Advanced Typing Master</h1>
+            <p class="subtitle">Take your typing skills to the next level</p>
+        </header>
+        
+        <section class="setup-panel" id="setup-panel">
+            <div class="setup-option">
+                <h3>Select Time</h3>
+                <select id="time-select">
+                    <option value="1">1 Minute</option>
+                    <option value="2">2 Minutes</option>
+                    <option value="3">3 Minutes</option>
+                    <option value="5">5 Minutes</option>
+                    <option value="10">10 Minutes</option>
+                    <option value="15">15 Minutes</option>
+                </select>
+            </div>
+            
+            <div class="setup-option">
+                <h3>Difficulty Level</h3>
+                <select id="level-select">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            
+            <div class="setup-option">
+                <h3>Start Test</h3>
+                <button id="start-btn">Start Typing Test</button>
+            </div>
+        </section>
+        
+        <section class="instructions">
+            <h2>Test Instructions</h2>
+            <ul>
+                <li>First select your preferred time and difficulty level</li>
+                <li>Click the "Start Typing Test" button</li>
+                <li>Type the text shown above as quickly and accurately as possible</li>
+                <li>Results will be shown when time runs out or when you complete the text</li>
+                <li>Longer time settings will display longer texts to type</li>
+            </ul>
+        </section>
+        
+        <section class="test-area" id="test-area">
+            <div class="timer" id="timer">05:00</div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div id="sample-text"></div>
+            
+            <textarea 
+                id="typing-input" 
+                placeholder="Start typing here... (after test begins)"
+                disabled
+            ></textarea>
+            
+            <div class="controls">
+                <button id="reset-test-btn" disabled>Reset Test</button>
+                <button id="new-test-btn">New Test</button>
+            </div>
+        </section>
+        
+        <section class="results" id="results">
+            <h2>Your Typing Results</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="wpm">0</div>
+                    <div class="stat-label">Words Per Minute</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="errors">0</div>
+                    <div class="stat-label">Errors</div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>Advanced Typing Master - Perfect practice for every level</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const startBtn = document.getElementById('start-btn');
+            const resetTestBtn = document.getElementById('reset-test-btn');
+            const newTestBtn = document.getElementById('new-test-btn');
+            const typingInput = document.getElementById('typing-input');
+            const sampleText = document.getElementById('sample-text');
+            const timerDisplay = document.getElementById('timer');
+            const progressBar = document.getElementById('progress');
+            const resultsSection = document.getElementById('results');
+            const testArea = document.getElementById('test-area');
+            const setupPanel = document.getElementById('setup-panel');
+            const wpmDisplay = document.getElementById('wpm');
+            const accuracyDisplay = document.getElementById('accuracy');
+            const errorsDisplay = document.getElementById('errors');
+            const timeSelect = document.getElementById('time-select');
+            const levelSelect = document.getElementById('level-select');
+            
+            // Variables
+            let timeLeft = 0;
+            let totalTime = 0;
+            let timer;
+            let testStarted = false;
+            let startTime, endTime;
+            
+            // Text samples for different difficulty levels
+            const textSamples = {
+                easy: [
+                    "The quick brown fox jumps over the lazy dog. This sentence contains every letter in the English alphabet.",
+                    "Typing is an essential skill in today's digital world. Practice regularly to improve your speed and accuracy.",
+                    "Computers have revolutionized how we work and communicate. Learning to type efficiently can save you valuable time.",
+                    "Programming is the process of creating a set of instructions that tell a computer how to perform a task.",
+                    "The internet connects people from all around the world. It has transformed how we access information and communicate."
+                ],
+                medium: [
+                    "Touch typing is a method of typing without looking at the keyboard. This skill can significantly increase your typing speed and efficiency. With regular practice, anyone can master this technique and improve their productivity.",
+                    "Programming languages like Python, JavaScript, and Java are extremely popular today. Learning to code in these languages can open up numerous career opportunities in the rapidly growing technology sector.",
+                    "Artificial Intelligence and Machine Learning are transformative technologies shaping our future. These fields are being applied across various industries including healthcare, finance, transportation, and education.",
+                    "Data Science is an interdisciplinary field that uses scientific methods to extract insights from structured and unstructured data. Companies rely on data scientists to make informed business decisions.",
+                    "Cloud computing has revolutionized the IT industry by providing on-demand availability of computer system resources. This technology allows businesses to scale efficiently without investing in expensive hardware infrastructure."
+                ],
+                hard: [
+                    "Quantum computing represents a fundamental shift from classical computing paradigms. Quantum bits or qubits leverage quantum phenomena like superposition and entanglement to perform complex calculations exponentially faster than classical computers for specific problems. This emerging technology has potential applications in cryptography, drug discovery, and optimization problems that are currently intractable with traditional computing approaches.",
+                    "Blockchain technology is a decentralized, distributed digital ledger that records transactions across many computers in such a way that the registered transactions cannot be altered retroactively. This technology underpins cryptocurrencies like Bitcoin and Ethereum, but its potential applications extend far beyond digital currencies to include supply chain management, digital voting systems, and secure sharing of medical data.",
+                    "Neural networks are computing systems inspired by the biological neural networks that constitute animal brains. These systems learn to perform tasks by considering examples, generally without being programmed with task-specific rules. Deep learning architectures using multiple layers have achieved remarkable results in image recognition, natural language processing, and autonomous vehicle navigation systems.",
+                    "Cryptography is the practice and study of techniques for secure communication in the presence of adversarial behavior. Modern cryptographic algorithms provide confidentiality, data integrity, authentication, and non-repudiation. Public-key cryptography, in particular, forms the foundation of secure internet communication, digital signatures, and cryptocurrency transactions.",
+                    "Bioinformatics is an interdisciplinary field that develops methods and software tools for understanding biological data. As an intersection of computer science, statistics, mathematics, and engineering, bioinformatics has become essential for analyzing the vast datasets generated by high-throughput sequencing technologies in genomics, proteomics, and other omics technologies."
+                ]
+            };
+            
+            // Extended text samples for longer durations
+            const extendedTextSamples = {
+                easy: [
+                    "The quick brown fox jumps over the lazy dog. This classic sentence contains every letter of the English alphabet. Typing practice is essential for developing speed and accuracy. Regular exercise of your typing skills will gradually improve your performance. Start with simple sentences and gradually move to more complex texts. Remember that consistency is more important than long practice sessions. Even fifteen minutes of daily practice can yield significant improvements over time. Focus on accuracy first, then work on increasing your speed. Proper finger placement on the keyboard is crucial for efficient typing. The home row keys are the foundation of touch typing. Keep your wrists elevated and fingers curved while typing. Take regular breaks to avoid strain and fatigue. With dedication and practice, you can become an excellent typist. The benefits of good typing skills extend to many aspects of modern life. From writing emails to coding programs, typing is an essential skill in the digital age. Continue practicing and you will see continuous improvement in your abilities.",
+                    "Computers have transformed how we work, learn, and communicate. Learning to type efficiently is one of the most valuable skills in today's world. With good typing skills, you can complete tasks faster and with fewer errors. Practice regularly to build muscle memory in your fingers. Start by familiarizing yourself with the keyboard layout. Place your fingers on the home row keys: ASDF for the left hand and JKL; for the right hand. Your thumbs should rest on the space bar. Keep your eyes on the screen rather than looking down at the keyboard. This may feel difficult at first, but it will become easier with practice. Begin with short practice sessions and gradually increase the duration. Focus on accuracy rather than speed in the beginning. As you become more comfortable, challenge yourself with longer texts and time trials. Remember that everyone progresses at their own pace. Don't get discouraged by initial slow progress. With consistent effort, you will see improvement over time. Celebrate small milestones along your typing journey."
+                ],
+                medium: [
+                    "Programming represents one of the most valuable skill sets in the modern economy. Languages like Python, JavaScript, Java, C++, and Ruby power the digital world we inhabit. Learning to program not only opens career opportunities but also develops logical thinking and problem-solving abilities. The journey begins with understanding basic concepts like variables, data types, and control structures. As you progress, you'll encounter more complex topics such as object-oriented programming, algorithms, and data structures. Practice is essential - try building small projects that interest you. Web development, data analysis, mobile apps, and game development are popular starting points. The programming community is generally welcoming to beginners, with countless resources available online. Remember that even experienced programmers continuously learn new technologies and techniques. Debugging is an inevitable part of the process - view errors as learning opportunities rather than failures. With dedication and consistent practice, programming can become not just a skill but a creative outlet and potentially a rewarding career path. The field continues to evolve rapidly, offering endless opportunities for growth and specialization.",
+                    "Artificial Intelligence and Machine Learning represent the frontier of technological innovation. These fields involve creating systems that can learn from data, identify patterns, and make decisions with minimal human intervention. Machine Learning, a subset of AI, focuses on algorithms that improve automatically through experience. Deep Learning uses neural networks with multiple layers to model complex patterns in large datasets. Natural Language Processing enables computers to understand, interpret, and generate human language. Computer Vision allows machines to identify and process objects in images and videos. Reinforcement Learning involves training algorithms through a system of rewards and punishments. These technologies power recommendation systems, voice assistants, autonomous vehicles, and medical diagnosis tools. The ethical implications of AI are increasingly important as these systems become more integrated into daily life. Issues of bias, privacy, accountability, and transparency require careful consideration. The field offers tremendous opportunities for those with skills in mathematics, statistics, and programming. Continuous learning is essential as the technology evolves rapidly. Both the challenges and potential benefits of AI make it one of the most exciting fields in technology today."
+                ],
+                hard: [
+                    "Quantum computing represents a paradigm shift from classical computing that harnesses quantum mechanical phenomena to perform operations on data. While classical computers use bits that can be either 0 or 1, quantum computers use quantum bits or qubits that can exist in superposition states of 0 and 1 simultaneously. This property, along with entanglement and quantum interference, enables quantum computers to solve certain problems exponentially faster than classical computers. Quantum algorithms like Shor's algorithm for factorization and Grover's algorithm for database search demonstrate this potential speedup. Major approaches to building quantum computers include superconducting circuits, trapped ions, photonic systems, and topological qubits. The field is still in its early stages, with current devices being noisy intermediate-scale quantum computers. Significant challenges remain in improving qubit coherence times, gate fidelities, and error correction. Potential applications include drug discovery through molecular simulation, optimization problems in logistics and finance, and breaking current cryptographic systems. The development of quantum-resistant cryptography is underway to address this last concern. Major technology companies and research institutions are investing heavily in quantum computing research. While fault-tolerant universal quantum computers may be years away, the field is advancing rapidly with both theoretical and experimental breakthroughs occurring regularly. Quantum computing represents one of the most exciting frontiers in computer science and physics.",
+                    "Blockchain technology represents a fundamental innovation in how information is stored and transmitted in a decentralized manner. At its core, a blockchain is a distributed, immutable digital ledger that records transactions in a verifiable and permanent way. The technology gained prominence as the underlying infrastructure for cryptocurrencies like Bitcoin, but its potential applications extend far beyond digital currencies. Smart contracts—self-executing contracts with terms directly written into code—enable complex agreements without intermediaries. Decentralized applications run on a peer-to-peer network rather than a single computer. Consensus mechanisms like Proof of Work and Proof of Stake ensure network security and agreement on the state of the ledger. Different blockchain platforms offer various trade-offs between decentralization, security, and scalability. Interoperability between different blockchain networks is an active area of research and development. Potential use cases include supply chain management, digital identity, voting systems, and decentralized finance. The technology faces challenges including scalability limitations, energy consumption concerns, regulatory uncertainty, and user experience barriers. Despite these challenges, blockchain continues to attract significant investment and research interest. The technology has the potential to reshape how we think about trust, transparency, and coordination in digital systems. As the ecosystem matures, we may see blockchain become integrated into many aspects of digital infrastructure."
+                ]
+            };
+            
+            // Event listeners
+            startBtn.addEventListener('click', startTest);
+            resetTestBtn.addEventListener('click', resetTest);
+            newTestBtn.addEventListener('click', newTest);
+            typingInput.addEventListener('input', checkProgress);
+            typingInput.addEventListener('keydown', handleKeyDown);
+            
+            function startTest() {
+                const selectedTime = parseInt(timeSelect.value);
+                const selectedLevel = levelSelect.value;
+                
+                if (selectedTime < 1) return;
+                
+                totalTime = selectedTime * 60;
+                timeLeft = totalTime;
+                
+                testStarted = true;
+                startBtn.disabled = true;
+                resetTestBtn.disabled = false;
+                typingInput.disabled = false;
+                typingInput.focus();
+                
+                // Show test area and hide setup
+                testArea.style.display = 'block';
+                setupPanel.style.display = 'none';
+                
+                // Set sample text based on difficulty level and time
+                let text = generateTextForTime(selectedTime, selectedLevel);
+                
+                sampleText.innerHTML = ''; // Clear previous text
+                
+                // Add level indicator
+                const levelIndicator = document.createElement('span');
+                levelIndicator.className = `level-indicator level-${selectedLevel}`;
+                levelIndicator.textContent = selectedLevel.toUpperCase();
+                sampleText.appendChild(levelIndicator);
+                sampleText.appendChild(document.createElement('br'));
+                sampleText.appendChild(document.createElement('br'));
+                
+                // Add text with spans for each character
+                const textContainer = document.createElement('span');
+                textContainer.id = 'text-container';
+                for (let i = 0; i < text.length; i++) {
+                    const charSpan = document.createElement('span');
+                    charSpan.textContent = text[i];
+                    charSpan.id = `char-${i}`;
+                    textContainer.appendChild(charSpan);
+                }
+                sampleText.appendChild(textContainer);
+                
+                // Highlight first character
+                document.getElementById('char-0').classList.add('active-char');
+                
+                typingInput.value = '';
+                
+                startTime = new Date();
+                updateTimerDisplay();
+                updateProgressBar();
+                
+                timer = setInterval(function() {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    updateProgressBar();
+                    
+                    if (timeLeft <= 0) {
+                        endTest();
+                    }
+                }, 1000);
+            }
+            
+            function generateTextForTime(minutes, level) {
+                // Base word count estimation (assuming average typing speed of 40 WPM)
+                const baseWordCount = minutes * 40;
+                
+                // Adjust based on difficulty level
+                let wordCount;
+                if (level === 'easy') {
+                    wordCount = baseWordCount * 0.8; // Shorter texts for easy level
+                } else if (level === 'medium') {
+                    wordCount = baseWordCount;
+                } else {
+                    wordCount = baseWordCount * 1.2; // Longer texts for hard level
+                }
+                
+                // Select appropriate text samples based on length needed
+                let sourceTexts;
+                if (minutes >= 5) {
+                    // Use extended texts for longer durations
+                    sourceTexts = extendedTextSamples[level] || textSamples[level];
+                } else {
+                    sourceTexts = textSamples[level];
+                }
+                
+                // Build text of appropriate length
+                let resultText = '';
+                let currentWordCount = 0;
+                
+                while (currentWordCount < wordCount) {
+                    const randomText = sourceTexts[Math.floor(Math.random() * sourceTexts.length)];
+                    const textWordCount = randomText.split(' ').length;
+                    
+                    if (currentWordCount + textWordCount > wordCount) {
+                        // Add partial text to reach target word count
+                        const wordsNeeded = wordCount - currentWordCount;
+                        const partialText = randomText.split(' ').slice(0, wordsNeeded).join(' ');
+                        resultText += (resultText ? ' ' : '') + partialText + '.';
+                        break;
+                    } else {
+                        resultText += (resultText ? ' ' : '') + randomText;
+                        currentWordCount += textWordCount;
+                    }
+                }
+                
+                return resultText;
+            }
+            
+            function resetTest() {
+                clearInterval(timer);
+                testStarted = false;
+                startBtn.disabled = false;
+                resetTestBtn.disabled = true;
+                typingInput.disabled = true;
+                typingInput.value = '';
+                timeLeft = totalTime;
+                updateTimerDisplay();
+                updateProgressBar();
+                resultsSection.style.display = 'none';
+                
+                // Reset character highlighting
+                const textContainer = document.getElementById('text-container');
+                if (textContainer) {
+                    const chars = textContainer.children;
+                    for (let i = 0; i < chars.length; i++) {
+                        chars[i].className = '';
+                    }
+                    // Highlight first character again
+                    if (chars.length > 0) {
+                        chars[0].classList.add('active-char');
+                    }
+                }
+            }
+            
+            function newTest() {
+                resetTest();
+                testArea.style.display = 'none';
+                setupPanel.style.display = 'flex';
+                resultsSection.style.display = 'none';
+            }
+            
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Change color when time is running out
+                if (timeLeft <= 30) {
+                    timerDisplay.style.color = '#ff4444';
+                } else if (timeLeft <= 60) {
+                    timerDisplay.style.color = '#ffaa00';
+                } else {
+                    timerDisplay.style.color = '#ffcc00';
+                }
+            }
+            
+            function updateProgressBar() {
+                const progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+            }
+            
+            function handleKeyDown(e) {
+                // Prevent default action for Tab key
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                }
+            }
+            
+            function checkProgress() {
+                if (!testStarted) return;
+                
+                const typedText = typingInput.value;
+                const textContainer = document.getElementById('text-container');
+                if (!textContainer) return;
+                
+                const originalText = textContainer.textContent;
+                
+                // Update character highlighting
+                for (let i = 0; i < originalText.length; i++) {
+                    const charElement = document.getElementById(`char-${i}`);
+                    if (i < typedText.length) {
+                        if (typedText[i] === originalText[i]) {
+                            charElement.className = 'correct-char';
+                        } else {
+                            charElement.className = 'incorrect-char';
+                        }
+                    } else if (i === typedText.length) {
+                        charElement.className = 'active-char';
+                    } else {
+                        charElement.className = '';
+                    }
+                }
+                
+                // If user finishes typing before time
+                if (typedText.length >= originalText.length) {
+                    endTest();
+                }
+            }
+            
+            function endTest() {
+                clearInterval(timer);
+                testStarted = false;
+                typingInput.disabled = true;
+                endTime = new Date();
+                
+                calculateResults();
+                resultsSection.style.display = 'block';
+            }
+            
+            function calculateResults() {
+                const typedText = typingInput.value;
+                const textContainer = document.getElementById('text-container');
+                if (!textContainer) return;
+                
+                const originalText = textContainer.textContent;
+                
+                // Calculate time taken in minutes
+                const timeTaken = (endTime - startTime) / 1000 / 60;
+                
+                // Calculate words per minute (WPM)
+                const wordCount = typedText.trim().split(/\s+/).length;
+                const wpm = Math.round(wordCount / timeTaken);
+                
+                // Calculate accuracy
+                let errors = 0;
+                const minLength = Math.min(typedText.length, originalText.length);
+                
+                for (let i = 0; i < minLength; i++) {
+                    if (typedText[i] !== originalText[i]) {
+                        errors++;
+                    }
+                }
+                
+                // Add errors for extra characters typed
+                errors += Math.max(0, typedText.length - originalText.length);
+                
+                const totalChars = Math.max(typedText.length, originalText.length);
+                const accuracy = Math.round(((totalChars - errors) / totalChars) * 100);
+                
+                // Display results
+                wpmDisplay.textContent = wpm;
+                accuracyDisplay.textContent = accuracy + '%';
+                errorsDisplay.textContent = errors;
+            }
+        });
+    </script>
+</body>
+</html>
